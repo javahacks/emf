@@ -7,20 +7,21 @@ import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.edit.command.AddCommand;
-import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
+import org.eclipse.emf.edit.command.RemoveCommand;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.transaction.RecordingCommand;
+import org.eclipse.emf.transaction.RunnableWithResult;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.emf.transaction.impl.TransactionalEditingDomainImpl;
-import org.eclipse.emf.transaction.ui.provider.TransactionalAdapterFactoryContentProvider;
 import org.eclipse.emf.transaction.ui.provider.TransactionalAdapterFactoryLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -31,26 +32,36 @@ import com.javahacks.emf.mt.model.Signal;
 import com.javahacks.emf.mt.model.provider.ModelItemProviderAdapterFactory;
 import com.javahacks.emf.mt.model.util.EMFTransactionHelper;
 
-public class ModelView3 {
+public class TransactionView {
 
 	private TransactionalEditingDomain editingDomain;
 
 	@Inject
-	public ModelView3(Composite parent) {
+	public TransactionView(Composite parent) {
 
 		AdapterFactory adapterFactory = new ModelItemProviderAdapterFactory();
 
 		editingDomain = new TransactionalEditingDomainImpl(adapterFactory);
-		
-		System.out.println(Platform.isRunning());
-		
+
 		EMFTransactionHelper.setSynchronizer((runnable) -> Display.getDefault().syncExec(runnable));
 
 		TableViewer tableViewer = new TableViewer(parent, SWT.VIRTUAL);
 
+		TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
+		column.getColumn().setWidth(200);
+		column.getColumn().setText("Name");
 
-		tableViewer.setContentProvider(new DelayedTransactionalAdapterFactoryContentProvider(editingDomain, adapterFactory));
-		tableViewer.setLabelProvider(new TransactionalAdapterFactoryLabelProvider(editingDomain,adapterFactory));
+		column = new TableViewerColumn(tableViewer, SWT.NONE);
+		column.getColumn().setWidth(200);
+		column.getColumn().setText("V");
+
+		column = new TableViewerColumn(tableViewer, SWT.NONE);
+		column.getColumn().setWidth(200);
+		column.getColumn().setText("Updates");
+
+		tableViewer.setContentProvider(
+				new DelayedTransactionalAdapterFactoryContentProvider(editingDomain, adapterFactory));
+		tableViewer.setLabelProvider(new TransactionalAdapterFactoryLabelProvider(editingDomain, adapterFactory));
 		tableViewer.setInput(initModel());
 
 	}
@@ -62,7 +73,7 @@ public class ModelView3 {
 		for (int i = 0; i < 10000; i++) {
 
 			Signal signal = ModelFactory.eINSTANCE.createSignal();
-			signal.setName(String.valueOf(i + 1));
+			signal.setName(UUID.randomUUID().toString());
 			signal.setValue(i);
 
 			model.getSignals().add(signal);
@@ -78,9 +89,8 @@ public class ModelView3 {
 				signal.setName(UUID.randomUUID().toString());
 				signal.setValue((int) Math.random());
 
-			//	editingDomain.getCommandStack().execute(AddCommand.create(editingDomain, model, ModelPackage.Literals.MODEL__SIGNALS, signal));
-				
-
+				editingDomain.getCommandStack()
+						.execute(AddCommand.create(editingDomain, model, ModelPackage.Literals.MODEL__SIGNALS, signal));
 
 				schedule(10);
 
@@ -94,8 +104,8 @@ public class ModelView3 {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-//				EMFTransactionHelper.removeElementExclusive(model, ModelPackage.Literals.MODEL__SIGNALS,
-//						model.getSignals().get(0));
+				editingDomain.getCommandStack().execute(RemoveCommand.create(editingDomain, model,
+						ModelPackage.Literals.MODEL__SIGNALS, model.getSignals().get(0)));
 
 				schedule(10);
 
@@ -108,24 +118,15 @@ public class ModelView3 {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				try {
-					editingDomain.runExclusive(()->{
-					
-						
-						List<Signal> clonedList = model.getSignals();
+				editingDomain.getCommandStack().execute(new RecordingCommand(editingDomain) {
 
-						clonedList.forEach(s -> s.setValue( Math.random()));
-						clonedList.forEach(s -> s.setUpdates(s.getUpdates()+1));
-						
-						
-						
-					});
-				} catch (InterruptedException e) {
-					//
-					
-				}
-				
-				
+					@Override
+					protected void doExecute() {
+						model.getSignals().forEach(s -> s.setValue(Math.random()));
+						model.getSignals().forEach(s -> s.setUpdates(s.getUpdates() + 1));
+					}
+				});
+
 				schedule();
 
 				return Status.OK_STATUS;

@@ -1,6 +1,5 @@
 package com.javahacks.emf.mt;
 
-import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -10,11 +9,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.AdapterFactory;
-import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
-import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -26,17 +23,27 @@ import com.javahacks.emf.mt.model.Signal;
 import com.javahacks.emf.mt.model.provider.ModelItemProviderAdapterFactory;
 import com.javahacks.emf.mt.model.util.EMFTransactionHelper;
 
-public class ModelView {
+public class ThreadView {
 
 	@Inject
-	public ModelView(Composite parent) {
+	public ThreadView(Composite parent) {
 
 		EMFTransactionHelper.setSynchronizer((runnable) -> Display.getDefault().syncExec(runnable));
 
 		TableViewer tableViewer = new TableViewer(parent, SWT.VIRTUAL);
+		TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
+		column.getColumn().setWidth(200);
+		column.getColumn().setText("Name");
+
+		column = new TableViewerColumn(tableViewer, SWT.NONE);
+		column.getColumn().setWidth(200);
+		column.getColumn().setText("V");
+
+		column = new TableViewerColumn(tableViewer, SWT.NONE);
+		column.getColumn().setWidth(200);
+		column.getColumn().setText("Updates");
 
 		AdapterFactory adapterFactory = new ModelItemProviderAdapterFactory();
-
 		tableViewer.setContentProvider(new DelayedAdapterFactoryContentProvider(adapterFactory));
 		tableViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
 		tableViewer.setInput(initModel());
@@ -50,7 +57,7 @@ public class ModelView {
 		for (int i = 0; i < 10000; i++) {
 
 			Signal signal = ModelFactory.eINSTANCE.createSignal();
-			signal.setName(String.valueOf(i + 1));
+			signal.setName(UUID.randomUUID().toString());
 			signal.setValue(i);
 
 			model.getSignals().add(signal);
@@ -94,12 +101,12 @@ public class ModelView {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				List<Signal> clonedList = EMFTransactionHelper.cloneCollectionExclusive(model.getSignals());
+				EMFTransactionHelper.runExclusive(() -> {
 
-				clonedList.forEach(s -> s.setValue( Math.random()));
-				clonedList.forEach(s -> s.setUpdates(s.getUpdates()+1));
-				
-				System.out.println(clonedList.size());
+					model.getSignals().forEach(s -> s.setValue(Math.random()));
+					model.getSignals().forEach(s -> s.setUpdates(s.getUpdates() + 1));
+
+				});
 
 				schedule();
 

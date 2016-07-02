@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
-  <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.window.main" label="Empty E4 Application" width="500" height="400">
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.window.main" label="EMF Multithreading Demo" width="500" height="400">
     <children xsi:type="advanced:PerspectiveStack" xmi:id="_ndqEID9hEeapl8eVAycWpw" elementId="com.javahacks.emf.mt.perspectivestack.0">
       <children xsi:type="advanced:Perspective" xmi:id="_obCSYD9hEeapl8eVAycWpw" elementId="com.javahacks.emf.mt.perspective.0">
         <children xsi:type="basic:PartSashContainer" xmi:id="_pplJID9hEeapl8eVAycWpw" elementId="com.javahacks.emf.mt.partsashcontainer.0">
           <children xsi:type="basic:PartStack" xmi:id="_qAqzcD9hEeapl8eVAycWpw" elementId="com.javahacks.emf.mt.partstack.0">
-            <children xsi:type="basic:Part" xmi:id="_qarO4D9hEeapl8eVAycWpw" elementId="com.javahacks.emf.mt.part.0" contributionURI="bundleclass://com.javahacks.emf.mt.ui/com.javahacks.emf.mt.ModelView"/>
+            <children xsi:type="basic:Part" xmi:id="_0VdKAEAyEea4sczWe4cKOQ" elementId="com.javahacks.emf.mt.ui.part.emftransaction" contributionURI="bundleclass://com.javahacks.emf.mt.ui/com.javahacks.emf.mt.TransactionView" label="EMF Transaction"/>
+            <children xsi:type="basic:Part" xmi:id="_qarO4D9hEeapl8eVAycWpw" elementId="com.javahacks.emf.mt.part.singlethread" contributionURI="bundleclass://com.javahacks.emf.mt.ui/com.javahacks.emf.mt.ThreadView" label="Single Thread"/>
           </children>
         </children>
       </children>

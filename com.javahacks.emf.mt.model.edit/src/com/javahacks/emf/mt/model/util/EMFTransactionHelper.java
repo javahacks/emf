@@ -11,11 +11,7 @@ import org.eclipse.emf.edit.command.AbstractOverrideableCommand;
 /**
  * Utility class that provides convenient methods for a thread safe modification of the global application model.
  * 
- * All
- * 
- * @author u15g76
- * 
- * 
+ * @author Wolfgang Geck 
  */
 public class EMFTransactionHelper {
 
@@ -49,7 +45,7 @@ public class EMFTransactionHelper {
 	}
 
 	/**
-	 * Convenient method to add a single element into the many-valued feature of the owner
+	 * Add a single element into the many-valued feature of the owner
 	 * 
 	 * @param owner
 	 * @param feature
@@ -60,7 +56,7 @@ public class EMFTransactionHelper {
 	}
 
 	/**
-	 * Convenient method to remove a single element from the many-valued feature of the owner
+	 * Remove a single element from the many-valued feature of the owner
 	 * 
 	 * @param owner
 	 * @param feature
@@ -71,7 +67,7 @@ public class EMFTransactionHelper {
 	}
 
 	/**
-	 * Convenient method to clear collection
+	 * Clear collection exclusive
 	 * 
 	 * @param collection
 	 */
@@ -80,7 +76,7 @@ public class EMFTransactionHelper {
 	}
 
 	/**
-	 * Convenient method to add all elements of a collection to another collection
+	 * Add all elements of a collection to another collection
 	 * 
 	 * @param collection
 	 */
