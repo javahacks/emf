@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?><target name="target" sequenceNumber="8">
+<locations>
+<location path="${eclipse_home}" type="Profile"/>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.emf.transaction.sdk.feature.group" version="1.10.0.201606071900"/>
+<repository location="http://download.eclipse.org/releases/neon"/>
+</location>
+</locations>
+</target>
