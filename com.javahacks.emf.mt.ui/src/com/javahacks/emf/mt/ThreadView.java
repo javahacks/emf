@@ -31,17 +31,16 @@ public class ThreadView {
 		EMFTransactionHelper.setSynchronizer((runnable) -> Display.getDefault().syncExec(runnable));
 
 		TableViewer tableViewer = new TableViewer(parent, SWT.VIRTUAL);
+		tableViewer.getTable().setHeaderVisible(true);
+		
 		TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
 		column.getColumn().setWidth(200);
-		column.getColumn().setText("Name");
+		column.getColumn().setText("Value");
+		
 
 		column = new TableViewerColumn(tableViewer, SWT.NONE);
 		column.getColumn().setWidth(200);
-		column.getColumn().setText("V");
-
-		column = new TableViewerColumn(tableViewer, SWT.NONE);
-		column.getColumn().setWidth(200);
-		column.getColumn().setText("Updates");
+		column.getColumn().setText("Total Updates");
 
 		AdapterFactory adapterFactory = new ModelItemProviderAdapterFactory();
 		tableViewer.setContentProvider(new DelayedAdapterFactoryContentProvider(adapterFactory));
@@ -98,13 +97,17 @@ public class ThreadView {
 
 		new Job("Model Update") {
 
+			private int updates;
+			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
+				
+				
 				EMFTransactionHelper.runExclusive(() -> {
 
 					model.getSignals().forEach(s -> s.setValue(Math.random()));
-					model.getSignals().forEach(s -> s.setUpdates(s.getUpdates() + 1));
+					model.getSignals().forEach(s -> s.setUpdates(updates++));
 
 				});
 

@@ -43,21 +43,16 @@ public class TransactionView {
 
 		editingDomain = new TransactionalEditingDomainImpl(adapterFactory);
 
-		EMFTransactionHelper.setSynchronizer((runnable) -> Display.getDefault().syncExec(runnable));
-
 		TableViewer tableViewer = new TableViewer(parent, SWT.VIRTUAL);
+		tableViewer.getTable().setHeaderVisible(true);
 
 		TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
 		column.getColumn().setWidth(200);
-		column.getColumn().setText("Name");
+		column.getColumn().setText("Value");
 
 		column = new TableViewerColumn(tableViewer, SWT.NONE);
 		column.getColumn().setWidth(200);
-		column.getColumn().setText("V");
-
-		column = new TableViewerColumn(tableViewer, SWT.NONE);
-		column.getColumn().setWidth(200);
-		column.getColumn().setText("Updates");
+		column.getColumn().setText("Total Updates");
 
 		tableViewer.setContentProvider(
 				new DelayedTransactionalAdapterFactoryContentProvider(editingDomain, adapterFactory));
@@ -115,6 +110,8 @@ public class TransactionView {
 
 		new Job("Model Update") {
 
+			private int updates;
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
@@ -123,7 +120,7 @@ public class TransactionView {
 					@Override
 					protected void doExecute() {
 						model.getSignals().forEach(s -> s.setValue(Math.random()));
-						model.getSignals().forEach(s -> s.setUpdates(s.getUpdates() + 1));
+						model.getSignals().forEach(s -> s.setUpdates(updates++));
 					}
 				});
 

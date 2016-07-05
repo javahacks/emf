@@ -163,11 +163,9 @@ public class SignalItemProvider
 		Signal signal=(Signal) object;
 		
 		switch (columnIndex) {
-		case 0:
-			return signal.getName();			
-		case 1:
+		case 0:			
 			return String.valueOf(signal.getValue());
-		case 2:
+		case 1:
 			return String.valueOf(signal.getUpdates());
 		}
 		
