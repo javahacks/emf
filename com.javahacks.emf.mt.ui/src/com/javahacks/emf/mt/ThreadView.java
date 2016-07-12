@@ -1,7 +1,9 @@
 package com.javahacks.emf.mt;
 
+import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -9,6 +11,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.AdapterFactory;
+import org.eclipse.emf.edit.provider.IDisposable;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -24,7 +27,12 @@ import com.javahacks.emf.mt.model.provider.ModelItemProviderAdapterFactory;
 import com.javahacks.emf.ui.util.DelayedAdapterFactoryContentProvider;
 import com.javahacks.emf.ui.util.EMFTransactionHelper;
 
+/**
+ * View that uses the UI thread to synchronize the domain model
+ */
 public class ThreadView {
+
+	private AdapterFactory adapterFactory;
 
 	@Inject
 	public ThreadView(Composite parent) {
@@ -33,17 +41,16 @@ public class ThreadView {
 
 		TableViewer tableViewer = new TableViewer(parent, SWT.VIRTUAL);
 		tableViewer.getTable().setHeaderVisible(true);
-		
+
 		TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
 		column.getColumn().setWidth(200);
 		column.getColumn().setText("Value");
-		
 
 		column = new TableViewerColumn(tableViewer, SWT.NONE);
 		column.getColumn().setWidth(200);
 		column.getColumn().setText("Total Updates");
 
-		AdapterFactory adapterFactory = new ModelItemProviderAdapterFactory();
+		adapterFactory = new ModelItemProviderAdapterFactory();
 		tableViewer.setContentProvider(new DelayedAdapterFactoryContentProvider(adapterFactory));
 		tableViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
 		tableViewer.setInput(initModel());
@@ -99,12 +106,10 @@ public class ThreadView {
 		new Job("Model Update") {
 
 			private int updates;
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				
-				
 				EMFTransactionHelper.runExclusive(() -> {
 
 					model.getSignals().forEach(s -> s.setValue(Math.random()));
@@ -118,7 +123,26 @@ public class ThreadView {
 			}
 		}.schedule();
 
+		new Job("Model Iterate") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				List<Signal> clonedSignals = EMFTransactionHelper.cloneCollectionExclusive(model.getSignals());
+
+				System.out.println(clonedSignals.stream().count());
+
+				schedule(200);
+
+				return Status.OK_STATUS;
+			}
+		}.schedule();
+
 		return model;
 	}
 
+	@PreDestroy
+	private void dispose() {
+		((IDisposable) adapterFactory).dispose();
+	}
 }

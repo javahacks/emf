@@ -1,8 +1,8 @@
 package com.javahacks.emf.mt;
 
-import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -12,18 +12,15 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
-import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.provider.IDisposable;
 import org.eclipse.emf.transaction.RecordingCommand;
-import org.eclipse.emf.transaction.RunnableWithResult;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.emf.transaction.impl.TransactionalEditingDomainImpl;
 import org.eclipse.emf.transaction.ui.provider.TransactionalAdapterFactoryLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 
 import com.javahacks.emf.mt.model.Model;
 import com.javahacks.emf.mt.model.ModelFactory;
@@ -32,14 +29,18 @@ import com.javahacks.emf.mt.model.Signal;
 import com.javahacks.emf.mt.model.provider.ModelItemProviderAdapterFactory;
 import com.javahacks.emf.ui.util.DelayedTransactionalAdapterFactoryContentProvider;
 
+/**
+ * View that uses EMF transaction to synchronize the domain model
+ */
 public class TransactionView {
 
 	private TransactionalEditingDomain editingDomain;
+	private AdapterFactory adapterFactory;
 
 	@Inject
 	public TransactionView(Composite parent) {
 
-		AdapterFactory adapterFactory = new ModelItemProviderAdapterFactory();
+		adapterFactory = new ModelItemProviderAdapterFactory();
 
 		editingDomain = new TransactionalEditingDomainImpl(adapterFactory);
 
@@ -131,6 +132,11 @@ public class TransactionView {
 		}.schedule();
 
 		return model;
+	}
+	
+	@PreDestroy
+	private void dispose() {
+		((IDisposable)adapterFactory).dispose();
 	}
 
 }
