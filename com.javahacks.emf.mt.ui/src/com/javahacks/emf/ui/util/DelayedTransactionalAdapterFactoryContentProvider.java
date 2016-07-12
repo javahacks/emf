@@ -1,4 +1,4 @@
-package com.javahacks.emf.mt;
+package com.javahacks.emf.ui.util;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.common.notify.AdapterFactory;

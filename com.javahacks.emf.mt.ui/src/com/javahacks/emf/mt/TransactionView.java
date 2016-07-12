@@ -30,7 +30,7 @@ import com.javahacks.emf.mt.model.ModelFactory;
 import com.javahacks.emf.mt.model.ModelPackage;
 import com.javahacks.emf.mt.model.Signal;
 import com.javahacks.emf.mt.model.provider.ModelItemProviderAdapterFactory;
-import com.javahacks.emf.mt.model.util.EMFTransactionHelper;
+import com.javahacks.emf.ui.util.DelayedTransactionalAdapterFactoryContentProvider;
 
 public class TransactionView {
 

@@ -1,4 +1,4 @@
-package com.javahacks.emf.mt.model.util;
+package com.javahacks.emf.ui.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
