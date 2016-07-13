@@ -132,7 +132,7 @@ public class ThreadView {
 
 				System.out.println(clonedSignals.stream().count());
 
-				schedule(200);
+				schedule(2000);
 
 				return Status.OK_STATUS;
 			}
